@@ -4,6 +4,7 @@ const admin = require("../middlewares/admin");
 const { Product } = require("../models/product");
 const Order = require("../models/order");
 const Admin =require("../models/admin")
+const Ads=require("../models/advertisement")
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 adminRout.post("/admin/signup", async (req, res) => {
@@ -57,11 +58,45 @@ adminRout.post("/admin/signin", async (req, res) => {
   }
 });
 
+adminRout.patch("/admin/update-profile", admin, async (req, res) => {
+  try {
+    const { logo, servicablePincode, address } = req.body;
+
+    // Check which field is being updated
+    if (!logo && !servicablePincode && !address) {
+      return res.status(400).json({ msg: "No data provided to update." });
+    }
+
+    // Prepare the update object based on the field provided
+    const updateField = {};
+    if (logo) updateField.logo = logo;
+    if (servicablePincode) updateField.servicablePincode = servicablePincode;
+    if (address) updateField.address = address;
+
+    // Update the admin data based on email from JWT payload
+    const updatedAdmin = await Admin.findOneAndUpdate(
+      { _id: req.user }, // Use email from JWT payload
+      updateField,
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ msg: "Admin not found." });
+    }
+
+    res.json(updatedAdmin);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 
 adminRout.post("/admin/add-products", admin, async (req, res) => {
   try {
     const { name, description, images, quantity, price, category } = req.body;
     let product = new Product({
+      adminId:req.user,
       name,
       description,
       images,
@@ -76,9 +111,44 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
   }
 });
 
+adminRout.post("/admin/add-advertisement", admin, async (req, res) => {
+  try {
+    const { adName,adImageUrl } = req.body;
+    let ads = new Ads({
+      adName,
+      adImageUrl,
+      adminId:req.user
+    });
+    ads = await ads.save();
+    res.json(ads);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.get("/admin/get-advertisements", admin, async (req, res) => {
+  try {
+    const products = await Ads.find({adminId:req.user});
+    return res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.post("/admin/delete-advertsement", admin, async (req, res) => {
+  try {
+    const { id } = req.body;
+    let ads = await Ads.findByIdAndDelete(id);
+    res.json(ads);
+  } catch (e) {
+    console.error(e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 adminRout.get("/admin/get-products", admin, async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({adminId:req.user});
     return res.json(products);
   } catch (e) {
     res.status(500).json({ error: e.message });

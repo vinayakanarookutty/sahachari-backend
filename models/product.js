@@ -22,6 +22,10 @@ const productSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  adminId: {
+    type: String,
+    required: true,
+  },
   price: {
     type: Number,
     required: true,
