@@ -146,6 +146,11 @@ adminRout.post("/admin/delete-advertsement", admin, async (req, res) => {
   }
 });
 
+adminRout.get("/addmin",  async (req, res) => {
+
+    res.send("haiiiiiiiiiiiiii Route is getting");
+});
+
 adminRout.get("/admin/get-products", admin, async (req, res) => {
   try {
     const products = await Product.find({adminId:req.user});
