@@ -5,6 +5,16 @@ const { Product } = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
 
+
+userRouter.get("/api/get-products",  async (req, res) => {
+  try {
+    const products = await Product.find({});
+    return res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 userRouter.post("/api/add-to-cart", auth, async (req, res) => {
   try {
     const { id } = req.body;
