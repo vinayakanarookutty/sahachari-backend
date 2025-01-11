@@ -34,13 +34,13 @@ const adminSchema = mongoose.Schema({
     default: "",
   },
   servicablePincode: {
-    type: String,
+     type: [String]
   },
-  logo: {
-    type: String,
+  catagory: {
+    type: String
   },
  
-},{strict:false});
+});
 
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;

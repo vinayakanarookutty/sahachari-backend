@@ -14,7 +14,9 @@ const DB =
   "mongodb+srv://Dilshad:dilshad1041@cluster0.mcgvrw2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 //MIDDLEWARE
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 app.use(authRouter);
 app.use(adminRout);
 app.use(productRouter);

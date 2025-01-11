@@ -7,33 +7,48 @@ const Admin =require("../models/admin")
 const Ads=require("../models/advertisement")
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 adminRout.post("/admin/signup", async (req, res) => {
   try {
-    const { name, email, password,servicablePincode,logo,address } = req.body;
+    console.log(req.body)
+    const { name, email, password, servicablePincode, address, catagory } = req.body;
 
+   
+    if (
+      !Array.isArray(servicablePincode) || 
+      !servicablePincode.every(pincode => typeof pincode === "string")
+    ) {
+      return res.status(400).json({ msg: "servicablePincode must be an array of strings." });
+    }
+
+   
     const existingUser = await Admin.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ msg: "User with same email already exists!" });
+      return res.status(400).json({ msg: "User with the same email already exists!" });
     }
+
 
     const hashedPassword = await bcryptjs.hash(password, 8);
 
+    
     let user = new Admin({
       email,
       password: hashedPassword,
       name,
       servicablePincode,
-      logo,
-      address
+      address,
+      catagory,
     });
+
     user = await user.save();
-    res.json(user);
+    res.status(201).json(user);
   } catch (e) {
+    console.error("Error:", e.message); // Debugging log
     res.status(500).json({ error: e.message });
   }
 });
+
+
 
 
 
@@ -94,7 +109,7 @@ adminRout.patch("/admin/update-profile", admin, async (req, res) => {
 
 adminRout.post("/admin/add-products", admin, async (req, res) => {
   try {
-    const { name, description, images, quantity, price, category } = req.body;
+    const { name, description, images, quantity, price, category} = req.body;
     let product = new Product({
       adminId:req.user,
       name,
@@ -103,6 +118,7 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
       quantity,
       price,
       category,
+      adminId:req.user
     });
     product = await product.save();
     res.json(product);
@@ -110,6 +126,17 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+adminRout.get("/admin/get-products",admin,  async (req, res) => {
+  try {
+    const products = await Product.find({adminId:req.user});
+    return res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 
 adminRout.post("/admin/add-advertisement", admin, async (req, res) => {
   try {
