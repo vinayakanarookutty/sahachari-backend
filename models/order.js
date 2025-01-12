@@ -35,7 +35,7 @@ const orderSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-});
+},{strict:false});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;
