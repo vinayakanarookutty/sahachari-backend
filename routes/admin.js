@@ -105,6 +105,24 @@ adminRout.patch("/admin/update-profile", admin, async (req, res) => {
   }
 });
 
+adminRout.get("/admin/get-profile", admin, async (req, res) => {
+  try {
+    const adminDetails = await Admin.findById(req.user);
+
+    if (!adminDetails) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    // Convert Mongoose document to plain object and remove the password field
+    const { password, ...sanitizedDetails } = adminDetails.toObject();
+
+    return res.json(sanitizedDetails);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 
 
 adminRout.post("/admin/add-products", admin, async (req, res) => {
@@ -200,12 +218,23 @@ adminRout.post("/admin/delete-product", admin, async (req, res) => {
 
 adminRout.get("/admin/get-orders", admin, async (req, res) => {
   try {
-    const orders = await Order.find({});
-    res.json(orders);
+    
+
+    // Fetch orders based on adminId
+    const orders = await Order.find({ adminId: req.user });
+
+    // Remove adminId from each order
+    const sanitizedOrders = orders.map(order => {
+      const { adminId, ...rest } = order.toObject(); // Convert Mongoose document to plain object
+      return rest;
+    });
+
+    res.json(sanitizedOrders);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 adminRout.post("/admin/change-order-status", admin, async (req, res) => {
   try {

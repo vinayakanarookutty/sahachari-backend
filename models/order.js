@@ -19,6 +19,10 @@ const orderSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  adminId: {
+    type: String,
+    required: true,
+  },
   userId: {
     requires: true,
     type: String,
