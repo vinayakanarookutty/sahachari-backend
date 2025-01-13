@@ -218,10 +218,8 @@ adminRout.post("/admin/delete-product", admin, async (req, res) => {
 
 adminRout.get("/admin/get-orders", admin, async (req, res) => {
   try {
-    
-
-    // Fetch orders based on adminId
-    const orders = await Order.find({ adminId: req.user });
+    // Fetch orders where adminId array contains req.user
+    const orders = await Order.find({ adminId: { $in: [req.user] } });
 
     // Remove adminId from each order
     const sanitizedOrders = orders.map(order => {
@@ -234,6 +232,7 @@ adminRout.get("/admin/get-orders", admin, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 
 adminRout.post("/admin/change-order-status", admin, async (req, res) => {
