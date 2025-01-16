@@ -119,7 +119,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     let products = [];
     for (let i = 0; i < cart.length; i++) {
       // Extract productId correctly from the provided data structure
-      const productId = cart[i].product._id?.$oid || cart[i].product._id;
+      const productId = cart[i].product.id; // Access `id` instead of `_id`
 
       if (!productId) {
         return res.status(400).json({ msg: "Product ID is missing in the cart item." });
@@ -170,6 +170,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 
 userRouter.get("/api/orders/me", auth, async (req, res) => {
