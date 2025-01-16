@@ -79,24 +79,85 @@ userRouter.post("/api/save-user-address", auth, async (req, res) => {
   }
 });
 
+// userRouter.post("/api/order", auth, async (req, res) => {
+//   try {
+//     const { cart, totalPrice, address,adminId } = req.body;
+//     let products = [];
+//     for (let i = 0; i < cart.length; i++) {
+//       let product = await Product.findById(cart[i].product._id);
+//       if (product.quantity >= cart[i].quantity) {
+//         product.quantity -= cart[i].quantity;
+//         products.push({ product, quantity: cart[i].quantity });
+//         await product.save();
+//       } else {
+//         return res.status(400).json({ msg: "${product.name} is out of stock" });
+//       }
+//     }
+//     let user = await User.findById(req.user);
+//     user.cart = [];
+//     user = await user.save();
+
+//     let order = new Order({
+//       products,
+//       totalPrice,
+//       address,
+//       adminId,
+//       userId: req.user,
+//       orderedAt: new Date().getTime(),
+//     });
+
+//     order = await order.save();
+//     res.json(order);
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// });
+
 userRouter.post("/api/order", auth, async (req, res) => {
   try {
-    const { cart, totalPrice, address, } = req.body;
+    const { cart, totalPrice, address, adminId } = req.body;
+
+    // Validate the cart
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ msg: "Cart is empty or invalid." });
+    }
+
     let products = [];
     for (let i = 0; i < cart.length; i++) {
-      let product = await Product.findById(cart[i].product._id);
+      const productId = cart[i]?.product?._id;
+
+      // Validate product ID
+      if (!productId) {
+        return res.status(400).json({ msg: `Invalid product ID at index ${i}.` });
+      }
+
+      // Fetch the product from the database
+      let product = await Product.findById(productId);
+
+      // Validate if the product exists
+      if (!product) {
+        return res.status(404).json({ msg: `Product with ID ${productId} not found.` });
+      }
+
+      // Check if enough quantity is available
       if (product.quantity >= cart[i].quantity) {
         product.quantity -= cart[i].quantity;
         products.push({ product, quantity: cart[i].quantity });
         await product.save();
       } else {
-        return res.status(400).json({ msg: "${product.name} is out of stock" });
+        return res.status(400).json({ msg: `${product.name} is out of stock.` });
       }
     }
-    let user = await User.findById(req.user);
-    user.cart = [];
-    user = await user.save();
 
+    // Clear the user's cart
+    let user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found." });
+    }
+    user.cart = [];
+    await user.save();
+
+    // Create the order
     let order = new Order({
       products,
       totalPrice,
@@ -112,6 +173,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 userRouter.get("/api/orders/me", auth, async (req, res) => {
   try {
