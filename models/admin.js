@@ -40,7 +40,7 @@ const adminSchema = mongoose.Schema({
     type: String
   },
  
-});
+},{strict:false});
 
 const Admin = mongoose.model("Admin", adminSchema);
 module.exports = Admin;
