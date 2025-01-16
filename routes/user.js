@@ -118,8 +118,12 @@ userRouter.post("/api/order", auth, async (req, res) => {
 
     let products = [];
     for (let i = 0; i < cart.length; i++) {
-      const productId = cart[i].product._id;
-      const requestedQuantity = cart[i].quantity;
+      // Extract productId correctly from the provided data structure
+      const productId = cart[i].product._id?.$oid || cart[i].product._id;
+
+      if (!productId) {
+        return res.status(400).json({ msg: "Product ID is missing in the cart item." });
+      }
 
       // Fetch the product by ID
       let product = await Product.findById(productId);
@@ -129,6 +133,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
       }
 
       // Check if the product has sufficient stock
+      const requestedQuantity = cart[i].quantity;
       if (product.quantity >= requestedQuantity) {
         product.quantity -= requestedQuantity;
         products.push({ product, quantity: requestedQuantity });
@@ -165,6 +170,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 userRouter.get("/api/orders/me", auth, async (req, res) => {
   try {
