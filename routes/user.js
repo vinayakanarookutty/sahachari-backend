@@ -112,40 +112,31 @@ userRouter.post("/api/save-user-address", auth, async (req, res) => {
 //     res.status(500).json({ error: e.message });
 //   }
 // });
-
 userRouter.post("/api/order", auth, async (req, res) => {
   try {
     const { cart, totalPrice, address, adminId } = req.body;
 
-    // Validate the cart
-    if (!Array.isArray(cart) || cart.length === 0) {
-      return res.status(400).json({ msg: "Cart is empty or invalid." });
-    }
-
     let products = [];
     for (let i = 0; i < cart.length; i++) {
-      const productId = cart[i]?.product?._id;
+      const productId = cart[i].product._id;
+      const requestedQuantity = cart[i].quantity;
 
-      // Validate product ID
-      if (!productId) {
-        return res.status(400).json({ msg: `Invalid product ID at index ${i}.` });
-      }
-
-      // Fetch the product from the database
+      // Fetch the product by ID
       let product = await Product.findById(productId);
 
-      // Validate if the product exists
       if (!product) {
         return res.status(404).json({ msg: `Product with ID ${productId} not found.` });
       }
 
-      // Check if enough quantity is available
-      if (product.quantity >= cart[i].quantity) {
-        product.quantity -= cart[i].quantity;
-        products.push({ product, quantity: cart[i].quantity });
-        await product.save();
+      // Check if the product has sufficient stock
+      if (product.quantity >= requestedQuantity) {
+        product.quantity -= requestedQuantity;
+        products.push({ product, quantity: requestedQuantity });
+        await product.save(); // Update product stock
       } else {
-        return res.status(400).json({ msg: `${product.name} is out of stock.` });
+        return res
+          .status(400)
+          .json({ msg: `${product.name} is out of stock. Available quantity: ${product.quantity}` });
       }
     }
 
@@ -155,9 +146,9 @@ userRouter.post("/api/order", auth, async (req, res) => {
       return res.status(404).json({ msg: "User not found." });
     }
     user.cart = [];
-    await user.save();
+    user = await user.save();
 
-    // Create the order
+    // Create and save the order
     let order = new Order({
       products,
       totalPrice,
@@ -170,6 +161,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
     order = await order.save();
     res.json(order);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
