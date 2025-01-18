@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 adminRout.post("/admin/signup", async (req, res) => {
   try {
     console.log(req.body)
-    const { name, email, password, servicablePincode, address, catagory } = req.body;
+    const { name, email, password, servicablePincode, address, category } = req.body;
 
    
     if (
@@ -37,7 +37,7 @@ adminRout.post("/admin/signup", async (req, res) => {
       name,
       servicablePincode,
       address,
-      catagory,
+      category,
     });
 
     user = await user.save();

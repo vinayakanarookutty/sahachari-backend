@@ -36,7 +36,7 @@ const adminSchema = mongoose.Schema({
   servicablePincode: {
      type: [String]
   },
-  catagory: {
+  category: {
     type: String
   },
  
