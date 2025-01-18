@@ -4,6 +4,7 @@ const auth = require("../middlewares/auth");
 const { Product } = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
+const Admin = require("../models/admin");
 
 
 userRouter.get("/api/get-products",  async (req, res) => {
@@ -177,6 +178,36 @@ userRouter.get("/api/orders/me", auth, async (req, res) => {
   try {
     const { id } = req.body;
     const orders = await Order.find({ userId: req.user });
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+userRouter.get("/api/get-hotels",  async (req, res) => {
+  try {
+    
+    const orders = await Admin.find({ catagory:"Hotel" });
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+userRouter.post("/api/get-hotels-products",  async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log(id)
+    const orders = await Product.find({ adminId:id });
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+userRouter.post("/api/get-similar-products",  async (req, res) => {
+  try {
+    const { category } = req.body;
+    console.log(category)
+    const orders = await Product.find({ category:category });
     res.json(orders);
   } catch (e) {
     res.status(500).json({ error: e.message });

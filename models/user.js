@@ -34,6 +34,13 @@ const userSchema = mongoose.Schema({
     type: String,
     default: "",
   },
+  phoneNo: {
+    type: String,
+    default: "",
+  },
+  pincode: {
+    type: [String]
+  },
   type: {
     type: String,
     default: "user",
@@ -47,7 +54,7 @@ const userSchema = mongoose.Schema({
       },
     },
   ],
-});
+},{strict:false});
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
