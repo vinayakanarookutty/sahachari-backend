@@ -7,7 +7,7 @@ const Admin =require("../models/admin")
 const Ads=require("../models/advertisement")
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const User = require("../models/user");
 adminRout.post("/admin/signup", async (req, res) => {
   try {
     console.log(req.body)
@@ -295,5 +295,15 @@ async function fetchCategoryWiseProduct(category) {
   }
   return earnings;
 }
+
+adminRout.post("/admin/get-user",  async (req, res) => {
+  try {
+    const { userId } = req.body;
+    let user = await User.findById(userId)
+    res.json({address:user.address,phoneNo:user.phoneNo});
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 module.exports = adminRout;
