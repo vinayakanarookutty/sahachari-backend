@@ -8,6 +8,8 @@ const Ads=require("../models/advertisement")
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const delivery = require("../middlewares/delivery");
+const Delivery = require("../models/delivery");
 adminRout.post("/admin/signup", async (req, res) => {
   try {
     console.log(req.body)
@@ -135,7 +137,7 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
       images,
       quantity,
       price,
-      category,
+   
       adminId:req.user
     });
     product = await product.save();
@@ -235,7 +237,7 @@ adminRout.get("/admin/get-orders", admin, async (req, res) => {
 
 
 
-adminRout.post("/admin/change-order-status", admin, async (req, res) => {
+adminRout.post("/admin/change-order-status", delivery, async (req, res) => {
   try {
     const { id, status } = req.body;
     let order = await Order.findById(id);
@@ -300,7 +302,152 @@ adminRout.post("/admin/get-user",  async (req, res) => {
   try {
     const { userId } = req.body;
     let user = await User.findById(userId)
-    res.json({address:user.address,phoneNo:user.phoneNo});
+    res.json({address:user.address,phoneNo:user.phoneNo,name:user.name});
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.post("/delivery/signup", async (req, res) => {
+  try {
+    console.log(req.body)
+    const { name, email, password, servicablePincode,  } = req.body;
+
+   
+    if (
+      !Array.isArray(servicablePincode) || 
+      !servicablePincode.every(pincode => typeof pincode === "string")
+    ) {
+      return res.status(400).json({ msg: "servicablePincode must be an array of strings." });
+    }
+
+   
+    const existingUser = await Delivery.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: "User with the same email already exists!" });
+    }
+
+
+    const hashedPassword = await bcryptjs.hash(password, 8);
+
+    
+    let user = new Delivery({
+      email,
+      password: hashedPassword,
+      name,
+      servicablePincode,
+      orders:[]
+    });
+
+    user = await user.save();
+    res.status(201).json(user);
+  } catch (e) {
+    console.error("Error:", e.message); // Debugging log
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+
+
+
+adminRout.post("/delivery/signin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await Delivery.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ msg: "User with this email doesnot exist!" });
+    }
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Incorrect Password" });
+    }
+    const token = jwt.sign({ id: user._id }, "passwordKey");
+    res.json({ token, ...user._doc });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.post("/delivery/change-order-status", delivery, async (req, res) => {
+  try {
+    const { id, status } = req.body;
+    let order = await Order.findById(id);
+    order.status = status;
+    order = await order.save();
+
+    res.json(order);
+  } catch (e) {
+    console.error(e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+adminRout.get("/delivery/get-orders", async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.get("/delivery/add-orders", async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
+  try {
+    const { id } = req.body;
+    const order = await Order.findById(id);
+    const user = await Delivery.findById(req.user);
+    user.orders.push(order)
+    await user.save();
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+adminRout.get("/delivery/get-added-orders", delivery,async (req, res) => {
+  try {
+ 
+    const user = await Delivery.findById(req.user);
+
+    res.json(user.orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+adminRout.post("/delivery/get-admin", async (req, res) => {
+  try {
+    const { adminId } = req.body; // Expecting adminId to be an array
+
+    // Check if adminId is an array
+    if (!Array.isArray(adminId)) {
+      return res.status(400).json({ error: "adminId must be an array" });
+    }
+
+    // Fetch all admin users whose IDs are in the adminId array
+    const users = await Admin.find({ _id: { $in: adminId } });
+
+    // Map the required fields from the user data
+    const responseData = users.map(user => ({
+      address: user.address,
+      name: user.name
+    }));
+
+    // Return the mapped data
+    res.json(responseData);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
