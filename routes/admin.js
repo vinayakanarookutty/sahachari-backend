@@ -10,6 +10,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const delivery = require("../middlewares/delivery");
 const Delivery = require("../models/delivery");
+const dotenv =require("dotenv");
+const { generateUploadURL } = require("../middlewares/s3");
+dotenv.config()
 adminRout.post("/admin/signup", async (req, res) => {
   try {
     console.log(req.body)
@@ -137,7 +140,7 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
       images,
       quantity,
       price,
-   
+      category,
       adminId:req.user
     });
     product = await product.save();
@@ -386,6 +389,11 @@ adminRout.post("/delivery/change-order-status", delivery, async (req, res) => {
   }
 });
 
+adminRout.get('/admin/s3Url', async (req, res) => {
+  const url = await generateUploadURL()
+  res.send({url})
+})
+
 
 adminRout.get("/delivery/get-orders", async (req, res) => {
   try {
@@ -396,14 +404,7 @@ adminRout.get("/delivery/get-orders", async (req, res) => {
   }
 });
 
-adminRout.get("/delivery/add-orders", async (req, res) => {
-  try {
-    const orders = await Order.find({});
-    res.json(orders);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+
 
 adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
   try {

@@ -1,2 +1,9 @@
 
 .codegpt
+
+# Ignore node_modules
+node_modules/
+
+# Ignore .env files
+.env
+.env.*
