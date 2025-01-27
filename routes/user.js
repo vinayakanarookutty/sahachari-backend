@@ -214,7 +214,7 @@ userRouter.post("/api/get-similar-products",  async (req, res) => {
   }
 });
 
-userRouter.delete('/admin/delete',auth, async (req, res) => {
+userRouter.delete('/user/delete',auth, async (req, res) => {
   try {
    
     
