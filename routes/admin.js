@@ -476,12 +476,11 @@ adminRout.get('/admin/delete',admin, async (req, res) => {
   try {
    
     
-    // Find and delete the user
-    const deletedUser = await Admin.findById(req.user);
+   
     
    
 
-    res.status(200).json({ message: 'User deleted successfully', user: deletedUser.name });
+    res.status(200).json({ message: 'To request deletion of your "Sahachari" account and associated data (order history, saved addresses, payment information), please visit our Help Center: www.corestone.in '});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
