@@ -472,12 +472,8 @@ adminRout.post('/admin/delete',admin, async (req, res) => {
   }
 });
 
-adminRout.get('/admin/delete',admin, async (req, res) => {
+adminRout.get('/admin/delete', async (req, res) => {
   try {
-   
-    
-   
-    
    
 
     res.status(200).json({ message: 'To request deletion of your "Sahachari" account and associated data (order history, saved addresses, payment information), please visit our Help Center: www.corestone.in '});
