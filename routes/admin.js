@@ -418,6 +418,17 @@ adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+adminRout.get("/delivery/token", delivery,async (req, res) => {
+  try {
+  
+    const user = await Delivery.findById(req.user);
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 adminRout.get("/delivery/get-added-orders", delivery,async (req, res) => {
   try {
  
