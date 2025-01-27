@@ -454,7 +454,7 @@ adminRout.post("/delivery/get-admin", async (req, res) => {
   }
 });
 
-adminRout.delete('/admin/delete',admin, async (req, res) => {
+adminRout.post('/admin/delete',admin, async (req, res) => {
   try {
    
     
@@ -466,6 +466,22 @@ adminRout.delete('/admin/delete',admin, async (req, res) => {
     }
 
     res.status(200).json({ message: 'User deleted successfully', user: deletedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+adminRout.get('/admin/delete',admin, async (req, res) => {
+  try {
+   
+    
+    // Find and delete the user
+    const deletedUser = await Admin.findById(req.user);
+    
+   
+
+    res.status(200).json({ message: 'User deleted successfully', user: deletedUser.name });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
