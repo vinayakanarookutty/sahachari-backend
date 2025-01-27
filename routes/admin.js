@@ -454,4 +454,22 @@ adminRout.post("/delivery/get-admin", async (req, res) => {
   }
 });
 
+adminRout.delete('/admin/delete',admin, async (req, res) => {
+  try {
+   
+    
+    // Find and delete the user
+    const deletedUser = await Admin.findByIdAndDelete(req.user);
+    
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'User deleted successfully', user: deletedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = adminRout;
