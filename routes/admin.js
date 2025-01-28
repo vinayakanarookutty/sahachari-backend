@@ -248,6 +248,18 @@ adminRout.post("/admin/change-order-status", delivery, async (req, res) => {
     order = await order.save();
 
     res.json(order);
+    let details=await Delivery.updateOne(
+      {
+        orders: { $elemMatch: { id: id } }, // Find the array item by its ID
+      },
+      {
+        $set: {
+          'orders.$.status': status, // Update the specific variable in the array
+        },
+      }
+    );
+console.log(details)
+
   } catch (e) {
     console.error(e.message);
     res.status(500).json({ error: e.message });
@@ -383,6 +395,7 @@ adminRout.post("/delivery/change-order-status", delivery, async (req, res) => {
     order = await order.save();
 
     res.json(order);
+ 
   } catch (e) {
     console.error(e.message);
     res.status(500).json({ error: e.message });
@@ -429,16 +442,27 @@ adminRout.get("/delivery/token", delivery,async (req, res) => {
   }
 });
 
-adminRout.get("/delivery/get-added-orders", delivery,async (req, res) => {
+adminRout.get("/delivery/get-added-orders", delivery, async (req, res) => {
   try {
- 
+    // Fetch the delivery document
     const user = await Delivery.findById(req.user);
 
-    res.json(user.orders);
+    if (!user || !user.orders) {
+      return res.status(404).json({ message: "No orders found." });
+    }
+
+    // Extract all order IDs from the `user.orders` array
+    const orderIds = user.orders.map(order => order._id.toString());
+
+    // Query the `orders` collection using the extracted IDs
+    const orders = await Orders.find({ _id: { $in: orderIds } });
+
+    res.json(orders);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 adminRout.post("/delivery/get-admin", async (req, res) => {
   try {
