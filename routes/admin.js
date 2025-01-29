@@ -150,6 +150,35 @@ adminRout.post("/admin/add-products", admin, async (req, res) => {
   }
 });
 
+adminRout.put("/admin/edit-product/:id", admin, async (req, res) => {
+  try {
+    const { name, description, images, quantity, price, category } = req.body;
+    const { id } = req.params;
+
+    let updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        images,
+        quantity,
+        price,
+        category,
+      },
+      { new: true } // Returns the updated product
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(updatedProduct);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 adminRout.get("/admin/get-products",admin,  async (req, res) => {
   try {
     const products = await Product.find({adminId:req.user});
