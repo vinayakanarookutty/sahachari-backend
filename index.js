@@ -10,8 +10,8 @@ const userRouter = require("./routes/user");
 
 //INIT
 const app = express();
-const DB =
-  "mongodb+srv://Dilshad:dilshad1041@cluster0.mcgvrw2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const DB =process.env.MONGO_URI;
+  
 
 //MIDDLEWARE
 app.use(express.json({ limit: '50mb' }));
