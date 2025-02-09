@@ -24,7 +24,10 @@ app.use(userRouter);
 
 //CONNECTIONS
 mongoose
-  .connect(DB)
+  .connect(DB,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Connection successful");
   })
