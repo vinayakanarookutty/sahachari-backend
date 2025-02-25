@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const delivery = require("../middlewares/delivery");
 const Delivery = require("../models/delivery");
+const Service=require("../models/service");
 const dotenv =require("dotenv");
 const { generateUploadURL } = require("../middlewares/s3");
 dotenv.config()
@@ -535,5 +536,70 @@ adminRout.get('/admin/delete', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
+adminRout.post("/services", async (req, res) => {
+  try {
+      const { name, description, contact } = req.body;
+
+      if (!name || !description || !contact) {
+          return res.status(400).json({ error: "All fields are required" });
+      }
+
+      const cleanedContact = contact.replace(/\D/g, ""); // Remove non-numeric characters
+      if (cleanedContact.length < 10) {
+          return res.status(400).json({ error: "Invalid contact number" });
+      }
+
+      const service = new Service({ name, description, contact: cleanedContact });
+      await service.save();
+
+      res.status(201).json({ message: "Service created successfully", service });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+adminRout.get("/services", async (req, res) => {
+  try {
+      const services = await Service.find();
+      res.json(services);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+
+adminRout.put("/services/:id", async (req, res) => {
+  try {
+      const { name, description, contact } = req.body;
+      const cleanedContact = contact ? contact.replace(/\D/g, "") : undefined;
+
+      const service = await Service.findByIdAndUpdate(req.params.id, 
+          { name, description, contact: cleanedContact }, 
+          { new: true, runValidators: true }
+      );
+
+      if (!service) return res.status(404).json({ error: "Service not found" });
+
+      res.json({ message: "Service updated successfully", service });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+adminRout.delete("/services/:id", async (req, res) => {
+  try {
+      const service = await Service.findByIdAndDelete(req.params.id);
+      if (!service) return res.status(404).json({ error: "Service not found" });
+
+      res.json({ message: "Service deleted successfully" });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+
+
 
 module.exports = adminRout;
