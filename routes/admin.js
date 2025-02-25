@@ -215,6 +215,15 @@ adminRout.get("/admin/get-advertisements", admin, async (req, res) => {
   }
 });
 
+adminRout.get("/admin/getall-advertisements", admin, async (req, res) => {
+  try {
+    const products = await Ads.find({});
+    return res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 adminRout.post("/admin/delete-advertsement", admin, async (req, res) => {
   try {
     const { id } = req.body;
@@ -280,7 +289,8 @@ adminRout.post("/admin/change-order-status", delivery, async (req, res) => {
     res.json(order);
     let details=await Delivery.updateOne(
       {
-        orders: { $elemMatch: { id: id } }, // Find the array item by its ID
+        _id: req.user,
+        "orders._id": id, // Find the array item by its ID
       },
       {
         $set: {
@@ -417,20 +427,7 @@ adminRout.post("/delivery/signin", async (req, res) => {
   }
 });
 
-adminRout.post("/delivery/change-order-status", delivery, async (req, res) => {
-  try {
-    const { id, status } = req.body;
-    let order = await Order.findById(id);
-    order.status = status;
-    order = await order.save();
 
-    res.json(order);
- 
-  } catch (e) {
-    console.error(e.message);
-    res.status(500).json({ error: e.message });
-  }
-});
 
 adminRout.get('/admin/s3Url', async (req, res) => {
   const url = await generateUploadURL()
