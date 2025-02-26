@@ -1,6 +1,8 @@
 //IMPORT FROM PACKAGES
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors")
+
 
 //IMPORT FROM OTHER FILES
 const authRouter = require("./routes/auth");
@@ -17,6 +19,8 @@ const DB =process.env.MONGO_URI;
 //MIDDLEWARE
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(cors())
+
 
 app.use(authRouter);
 app.use(adminRout);
