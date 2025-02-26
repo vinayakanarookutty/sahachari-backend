@@ -447,6 +447,35 @@ adminRout.get("/delivery/get-orders", async (req, res) => {
 });
 
 
+adminRout.post("/delete-orders", async (req, res) => {
+  try {
+    const { id } = req.body
+
+    // Find the order by ID
+    const order = await Order.findById(id);
+
+    // If order not found
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Check if order status is greater than 1
+    if (order.status > 1) {
+      return res.status(400).json({ error: "Order cannot be deleted as its out of delivery" });
+    }
+
+    // Delete the order if status is 1 or lower
+    const deletedOrder = await Order.findByIdAndDelete(id);
+
+    res.json({ message: "Order deleted successfully", deletedOrder });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+
 
 
 adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
