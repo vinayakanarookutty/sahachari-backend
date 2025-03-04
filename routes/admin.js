@@ -10,7 +10,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const delivery = require("../middlewares/delivery");
 const Delivery = require("../models/delivery");
+const Service=require("../models/service");
 const dotenv =require("dotenv");
+const mongoose = require("mongoose");
 const { generateUploadURL } = require("../middlewares/s3");
 dotenv.config()
 adminRout.post("/admin/signup", async (req, res) => {
@@ -214,6 +216,15 @@ adminRout.get("/admin/get-advertisements", admin, async (req, res) => {
   }
 });
 
+adminRout.get("/admin/getall-advertisements",  async (req, res) => {
+  try {
+    const products = await Ads.find({});
+    return res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 adminRout.post("/admin/delete-advertsement", admin, async (req, res) => {
   try {
     const { id } = req.body;
@@ -273,21 +284,23 @@ adminRout.post("/admin/change-order-status", delivery, async (req, res) => {
   try {
     const { id, status } = req.body;
     let order = await Order.findById(id);
+    console.log(req.body,order)
     order.status = status;
     order = await order.save();
 
     res.json(order);
-    let details=await Delivery.updateOne(
+    console.log(req.user,id)
+    const updatedDelivery = await Delivery.findOneAndUpdate(
       {
-        orders: { $elemMatch: { id: id } }, // Find the array item by its ID
+        _id: new mongoose.Types.ObjectId(req.user),  // Ensure it's an ObjectId
+        "orders._id": new mongoose.Types.ObjectId(id), // Ensure orderId is an ObjectId
       },
       {
-        $set: {
-          'orders.$.status': status, // Update the specific variable in the array
-        },
-      }
+        $set: { "orders.$.status": status }, // Update status of the matched order
+      },
+      { new: true } // Return the updated document
     );
-console.log(details)
+    console.log(updatedDelivery)
 
   } catch (e) {
     console.error(e.message);
@@ -416,20 +429,7 @@ adminRout.post("/delivery/signin", async (req, res) => {
   }
 });
 
-adminRout.post("/delivery/change-order-status", delivery, async (req, res) => {
-  try {
-    const { id, status } = req.body;
-    let order = await Order.findById(id);
-    order.status = status;
-    order = await order.save();
 
-    res.json(order);
- 
-  } catch (e) {
-    console.error(e.message);
-    res.status(500).json({ error: e.message });
-  }
-});
 
 adminRout.get('/admin/s3Url', async (req, res) => {
   const url = await generateUploadURL()
@@ -439,12 +439,13 @@ adminRout.get('/admin/s3Url', async (req, res) => {
 
 adminRout.get("/delivery/get-orders", async (req, res) => {
   try {
-    const orders = await Order.find({});
+    const orders = await Order.find({ status: 0 }); // Fetch only orders where status is 0
     res.json(orders);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 
 
@@ -535,5 +536,70 @@ adminRout.get('/admin/delete', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
+adminRout.post("/services", async (req, res) => {
+  try {
+      const { name, description, contact } = req.body;
+
+      if (!name || !description || !contact) {
+          return res.status(400).json({ error: "All fields are required" });
+      }
+
+      const cleanedContact = contact.replace(/\D/g, ""); // Remove non-numeric characters
+      if (cleanedContact.length < 10) {
+          return res.status(400).json({ error: "Invalid contact number" });
+      }
+
+      const service = new Service({ name, description, contact: cleanedContact });
+      await service.save();
+
+      res.status(201).json({ message: "Service created successfully", service });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+adminRout.get("/services", async (req, res) => {
+  try {
+      const services = await Service.find();
+      res.json(services);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+
+adminRout.put("/services/:id", async (req, res) => {
+  try {
+      const { name, description, contact } = req.body;
+      const cleanedContact = contact ? contact.replace(/\D/g, "") : undefined;
+
+      const service = await Service.findByIdAndUpdate(req.params.id, 
+          { name, description, contact: cleanedContact }, 
+          { new: true, runValidators: true }
+      );
+
+      if (!service) return res.status(404).json({ error: "Service not found" });
+
+      res.json({ message: "Service updated successfully", service });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+adminRout.delete("/services/:id", async (req, res) => {
+  try {
+      const service = await Service.findByIdAndDelete(req.params.id);
+      if (!service) return res.status(404).json({ error: "Service not found" });
+
+      res.json({ message: "Service deleted successfully" });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+
+
 
 module.exports = adminRout;
