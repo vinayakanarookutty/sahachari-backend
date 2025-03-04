@@ -6,6 +6,7 @@ const Delivery = require("../models/delivery");
 const Orders = require("../models/order");
 const User = require("../models/user");
 const Ads=require("../models/advertisement")
+const Service=require("../models/service");
 
 // Products
 superAdminRouter.get("/api/get-products-details-super", async (req, res) => {
@@ -66,5 +67,26 @@ superAdminRouter.get("/api/get-advertisment-details-super", async (req, res) => 
         res.status(500).json({ error: e.message });
     }
 });
+
+// Services
+superAdminRouter.post("/api/add_services", async (req,res)=>{
+    try{
+        const {name ,description ,contact} = req.body;
+        const service = new Service({name ,description ,contact});
+        await service.save();
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+})
+
+
+superAdminRouter.get("/api/view_services",async (req,res)=>{
+    try{
+        const services = await Service.find({});
+        return res.json(services);
+    }catch(error){
+        res.status(500).json({error:error.message})
+    }
+})
 
 module.exports = superAdminRouter;
