@@ -87,6 +87,7 @@ superAdminRouter.post("/api/add_services", async (req,res)=>{
         const {name ,description ,contact} = req.body;
         const service = new Service({name ,description ,contact});
         await service.save();
+        return res.json(service);
     }catch(error){
         res.status(500).json({ error: error.message });
     }
