@@ -7,6 +7,7 @@ const Orders = require("../models/order");
 const User = require("../models/user");
 const Ads=require("../models/advertisement")
 const Service=require("../models/service");
+const { error } = require("console");
 
 // Products
 superAdminRouter.get("/api/get-products-details-super", async (req, res) => {
@@ -45,6 +46,18 @@ superAdminRouter.get("/api/get-order-details-super", async (req, res) => {
         return res.json(orders);
     } catch (e) {
         res.status(500).json({ error: e.message });
+    }
+});
+
+// delete order
+
+superAdminRouter.delete("/api/delete-order/:id", async (req, res) => {
+    try {
+        const service = await Orders.findByIdAndDelete(req.params.id);
+        if (!service) return res.status(404).json({ error: "order not found" });
+        res.json({ message: "order deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -88,5 +101,16 @@ superAdminRouter.get("/api/view_services",async (req,res)=>{
         res.status(500).json({error:error.message})
     }
 })
+
+superAdminRouter.delete("/api/delete_service/:id", async (req, res) => {
+    try {
+        const service = await Service.findByIdAndDelete(req.params.id);
+        if (!service) return res.status(404).json({ error: "Service not found" });
+        res.json({ message: "Service deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 module.exports = superAdminRouter;
