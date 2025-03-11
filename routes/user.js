@@ -152,6 +152,7 @@ userRouter.post("/api/order", auth, async (req, res) => {
       return res.status(404).json({ msg: "User not found." });
     }
     user.cart = [];
+    user.address=address
     user = await user.save();
 
     // Create and save the order
@@ -184,15 +185,8 @@ userRouter.get("/api/orders/me", auth, async (req, res) => {
   }
 });
 
-userRouter.get("/api/get-hotels",  async (req, res) => {
-  try {
-    
-    const orders = await Admin.find({ });
-    res.json(orders);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+
+
 userRouter.post("/api/get-hotels-products",  async (req, res) => {
   try {
     const { id } = req.body;

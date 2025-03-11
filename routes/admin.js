@@ -455,6 +455,8 @@ adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
     const order = await Order.findById(id);
     const user = await Delivery.findById(req.user);
     user.orders.push(order)
+    user.status=1
+
     await user.save();
     res.json(user);
   } catch (e) {
