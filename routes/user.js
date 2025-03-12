@@ -186,6 +186,15 @@ userRouter.get("/api/orders/me", auth, async (req, res) => {
 });
 
 
+userRouter.get("/api/get-hotels",  async (req, res) => {
+  try {
+
+    const orders = await Admin.find({ });
+    res.json(orders);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }})
+
 
 userRouter.post("/api/get-hotels-products",  async (req, res) => {
   try {
