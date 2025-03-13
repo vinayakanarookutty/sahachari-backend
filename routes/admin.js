@@ -454,8 +454,9 @@ adminRout.post("/delivery/added-orders", delivery,async (req, res) => {
     const { id } = req.body;
     const order = await Order.findById(id);
     const user = await Delivery.findById(req.user);
+    order.status=1
     user.orders.push(order)
-    user.status=1
+    await order.save()
 
     await user.save();
     res.json(user);
@@ -528,6 +529,10 @@ adminRout.post('/admin/delete',admin, async (req, res) => {
   }
 });
 
+
+
+
+
 adminRout.get('/admin/delete', async (req, res) => {
   try {
    
@@ -572,6 +577,9 @@ adminRout.get("/services", async (req, res) => {
 });
 
 
+
+
+
 adminRout.put("/services/:id", async (req, res) => {
   try {
       const { name, description, contact } = req.body;
@@ -598,6 +606,32 @@ adminRout.delete("/services/:id", async (req, res) => {
       res.json({ message: "Service deleted successfully" });
   } catch (error) {
       res.status(500).json({ error: error.message });
+  }
+});
+
+
+adminRout.post("/api/delete-orders",  async (req, res) => {
+  try {
+    const { id } = req.body; // Order ID to be deleted
+
+    // Find the order by ID
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Check if order status is 0 before deleting
+    if (order.status !== 0) {
+      return res.status(400).json({ error: "Order cannot be deleted, Order is Already Approved Contact Customer Service" });
+    }
+
+    // Delete order from Order collection
+    await Order.findByIdAndDelete(id);
+
+    res.json({ message: "Order removed successfully" });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
