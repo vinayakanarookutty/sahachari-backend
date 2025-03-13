@@ -7,14 +7,40 @@ const Order = require("../models/order");
 const Admin = require("../models/admin");
 
 
-userRouter.get("/api/get-products",  async (req, res) => {
+userRouter.get("/api/get-products", async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.aggregate([
+      {
+        $match: {
+          category: { $in: ["Vegetable & Fruits", "Meat", "Home Made"] }
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          products: { $push: "$$ROOT" } // Collect all products in an array
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          products: { $slice: ["$products", 2] } // Limit to 2 products per category
+        }
+      },
+      { $unwind: "$products" }, // Flatten the array
+      {
+        $replaceRoot: { newRoot: "$products" } // Convert back to original format
+      }
+    ]);
+
     return res.json(products);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
+
 
 userRouter.post("/api/add-to-cart", auth, async (req, res) => {
   try {
