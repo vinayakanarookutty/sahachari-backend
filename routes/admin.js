@@ -610,7 +610,7 @@ adminRout.delete("/services/:id", async (req, res) => {
 });
 
 
-adminRout.post("/api/delete-orders",  async (req, res) => {
+adminRout.post("/delete-orders",  async (req, res) => {
   try {
     const { id } = req.body; // Order ID to be deleted
 
