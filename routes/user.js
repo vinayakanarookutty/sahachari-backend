@@ -5,6 +5,7 @@ const { Product } = require("../models/product");
 const User = require("../models/user");
 const Order = require("../models/order");
 const Admin = require("../models/admin");
+const ServiceOrders = require("../models/orderservices");
 
 
 userRouter.get("/api/get-products", async (req, res) => {
@@ -242,6 +243,27 @@ userRouter.post("/api/get-similar-products",  async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+userRouter.post("/api/bookservice", async (req,res)=>{
+    try{
+        const {name ,phoneNumber,address ,serviceId} = req.body;
+        const service = new ServiceOrders({name,phoneNumber,address ,serviceId});
+        await service.save();
+        return res.json(service);
+    }catch(error){
+        res.status(500).json({ error: error.message });
+    }
+})
+
+userRouter.get("/api/get-bookservice", async (req,res)=>{
+  try{
+     
+      const service = await ServiceOrders.find({})
+      return res.json(service);
+  }catch(error){
+      res.status(500).json({ error: error.message });
+  }
+})
 
 userRouter.delete('/user/delete',auth, async (req, res) => {
   try {

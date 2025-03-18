@@ -37,6 +37,10 @@ const userSchema = mongoose.Schema({
   phoneNo: {
     type: String,
     default: "",
+    validate: {
+      validator: (value) => /^\d{10}$/.test(value),
+      message: "Phone number must be exactly 10 digits",
+    }
   },
   pincode: {
     type: [String]
