@@ -244,10 +244,12 @@ userRouter.post("/api/get-similar-products",  async (req, res) => {
   }
 });
 
-userRouter.post("/api/bookservice", async (req,res)=>{
+userRouter.post("/api/bookservice",auth, async (req,res)=>{
     try{
         const {name ,phoneNumber,address ,serviceId} = req.body;
-        const service = new ServiceOrders({name,phoneNumber,address ,serviceId});
+        const userId=req.user
+        const status="pending"
+        const service = new ServiceOrders({name,userId,status,phoneNumber,address,serviceId});
         await service.save();
         return res.json(service);
     }catch(error){
@@ -259,6 +261,16 @@ userRouter.get("/api/get-bookservice", async (req,res)=>{
   try{
      
       const service = await ServiceOrders.find({})
+      return res.json(service);
+  }catch(error){
+      res.status(500).json({ error: error.message });
+  }
+})
+
+userRouter.get("/api/get-userservice",auth, async (req,res)=>{
+  try{
+     
+      const service = await ServiceOrders.find({userId:req.user})
       return res.json(service);
   }catch(error){
       res.status(500).json({ error: error.message });

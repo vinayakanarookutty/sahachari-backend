@@ -6,6 +6,10 @@ const ServiceOrdersSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    userId:{
+        required:true,
+        type:String
+          },
     phoneNumber: {
         type: String,
         required: true
@@ -18,6 +22,10 @@ const ServiceOrdersSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    status:{
+        type: String,
+        required: true
+    }
   
 }, { timestamps: true });
 
