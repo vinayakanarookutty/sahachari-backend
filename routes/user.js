@@ -246,9 +246,14 @@ userRouter.post("/api/get-similar-products",  async (req, res) => {
 
 userRouter.post("/api/bookservice",auth, async (req,res)=>{
     try{
-        const {name ,phoneNumber,address ,serviceId} = req.body;
+        const {serviceId} = req.body;
         const userId=req.user
         const status="pending"
+        let user = await User.findById(req.user);
+        let name =user.name
+        let phoneNumber=user.phoneNumber
+        let address =user.address 
+        
         const service = new ServiceOrders({name,userId,status,phoneNumber,address,serviceId});
         await service.save();
         return res.json(service);
