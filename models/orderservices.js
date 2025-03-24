@@ -12,7 +12,6 @@ const ServiceOrdersSchema = new mongoose.Schema({
           },
     phoneNumber: {
         type: String,
-        required: true
     },
     address: {
         type: String,
