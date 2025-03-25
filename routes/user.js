@@ -251,7 +251,7 @@ userRouter.post("/api/bookservice",auth, async (req,res)=>{
         const status="pending"
         let user = await User.findById(req.user);
         let name =user.name
-        let phoneNumber=user.phoneNumber
+        let phoneNumber=user.phoneNo
         let address =user.address 
         
         const service = new ServiceOrders({name,userId,status,phoneNumber,address,serviceId});
