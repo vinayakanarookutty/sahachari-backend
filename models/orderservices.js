@@ -15,7 +15,6 @@ const ServiceOrdersSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        required: true
     },
     serviceId: {
         type: String,
