@@ -576,6 +576,15 @@ adminRout.get("/services", async (req, res) => {
   }
 });
 
+adminRout.get("/get", async (req, res) => {
+  try {
+      const services = "Hai Civiya"
+      res.json(services);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
 
 
 
