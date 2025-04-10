@@ -282,6 +282,24 @@ userRouter.get("/api/get-userservice",auth, async (req,res)=>{
   }
 })
 
+userRouter.get("/user/get-profile", auth, async (req, res) => {
+  try {
+    const adminDetails = await User.findById(req.user);
+
+    if (!adminDetails) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    // Convert Mongoose document to plain object and remove the password field
+    const { password, ...sanitizedDetails } = adminDetails.toObject();
+
+    return res.json(sanitizedDetails);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 userRouter.delete('/user/delete',auth, async (req, res) => {
   try {
    
