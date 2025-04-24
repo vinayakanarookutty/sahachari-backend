@@ -82,7 +82,7 @@ adminRout.post("/admin/signin", async (req, res) => {
 
 
 
-adminRout.post("/anaj", async (req, res) => {
+adminRout.get("/anaj", async (req, res) => {
   try {
   res.json("hai Iam anaj")
   } catch (e) {
