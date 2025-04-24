@@ -82,13 +82,7 @@ adminRout.post("/admin/signin", async (req, res) => {
 
 
 
-adminRout.get("/anaj", async (req, res) => {
-  try {
-  res.json("hai Iam anaj")
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+
 
 adminRout.patch("/admin/update-profile", admin, async (req, res) => {
   try {
