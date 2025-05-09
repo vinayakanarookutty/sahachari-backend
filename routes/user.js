@@ -106,6 +106,17 @@ userRouter.post("/api/save-user-address", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+userRouter.post("/api/notes", auth, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const user = await User.findById(req.user);
+    user.notes.push({ title, content });
+    await user.save();
+    res.status(201).json(user.notes); // Or send the newly added note
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // userRouter.post("/api/order", auth, async (req, res) => {
 //   try {

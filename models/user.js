@@ -1,6 +1,13 @@
 const mongoose = require("mongoose");
 const { productSchema } = require("./product");
-
+const noteSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 const userSchema = mongoose.Schema({
   name: {
     required: true,
@@ -20,6 +27,7 @@ const userSchema = mongoose.Schema({
       message: "Please enter a valid email address",
     },
   },
+  notes: [noteSchema],
   password: {
     required: true,
     type: String,
