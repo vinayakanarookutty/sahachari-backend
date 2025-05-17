@@ -10,7 +10,7 @@ const userRouter = require("./routes/user");
 const superAdminRouter = require("./routes/superAdmin");
 //INIT
 const app = express();
-const DB =process.env.MONGO_URI;
+const DB ="mongodb://admin:securepassword@54.173.132.195:27017/admin";
  
 app.use(cors())
 //MIDDLEWARE
