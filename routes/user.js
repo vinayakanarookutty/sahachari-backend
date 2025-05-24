@@ -6,6 +6,7 @@ const User = require("../models/user");
 const Order = require("../models/order");
 const Admin = require("../models/admin");
 const ServiceOrders = require("../models/orderservices");
+const Note = require("../models/notes");
 
 
 userRouter.get("/api/get-products", async (req, res) => {
@@ -106,17 +107,84 @@ userRouter.post("/api/save-user-address", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+// userRouter.post("/api/notes", auth, async (req, res) => {
+//   try {
+//     const { title, content } = req.body;
+//     const user = await User.findById(req.user);
+//     user.notes.push({ title, content });
+//     await user.save();
+//     res.status(201).json(user.  s); // Or send the newly added note
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// });
+
+// POST /api/notes - Create a new note
 userRouter.post("/api/notes", auth, async (req, res) => {
   try {
     const { title, content } = req.body;
-    const user = await User.findById(req.user);
-    user.notes.push({ title, content });
-    await user.save();
-    res.status(201).json(user.notes); // Or send the newly added note
+    const newNote = new Note({ title, content, userId: req.user });
+    const savedNote = await newNote.save();
+    res.status(201).json(savedNote);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
+
+// PUT /api/notes/:id - Edit a specific note
+userRouter.put("/api/notes/:id", auth, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user },
+      { title, content },
+      { new: true }
+    );
+    if (!updatedNote) return res.status(404).json({ message: "Note not found" });
+    res.json(updatedNote);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/notes/find-by-title
+userRouter.post("/api/notes/find-by-title", auth, async (req, res) => {
+  try {
+    const { title } = req.body;
+
+    const notes = await Note.find({
+   
+      title: title           
+    });
+
+    res.json(notes);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/notes/find-by-title
+userRouter.post("/api/notes/find-by-userId", auth, async (req, res) => {
+  try {
+    
+
+    const notes = await Note.find({
+      userId: req.user,            
+    });
+
+    res.json(notes);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+
+
+
+
 
 // userRouter.post("/api/order", auth, async (req, res) => {
 //   try {
